@@ -1,9 +1,6 @@
-[package]
-name = "mini-redis"
-version = "0.1.0"
-edition = "2021"
+[workspace]
 
-[dependencies]
-tokio = { version = "1", features = ["full"] }
-mini-redis = "0.4"
-bytes = "1"
+members = [
+    "spawning",
+    "mini-tokio",
+]
