@@ -14,6 +14,26 @@ use futures::{
     task::{self, ArcWake},
 };
 
+fn main() {
+    let mut mini_tokio = MiniTokio::new();
+
+    mini_tokio.spawn(async {
+        spawn(async {
+            delay(Duration::from_millis(100)).await;
+            println!("world");
+        });
+
+        spawn(async {
+            println!("hello");
+        });
+
+        delay(Duration::from_millis(200)).await;
+        std::process::exit(0);
+    });
+
+    mini_tokio.run();
+}
+
 struct Delay {
     when: Instant,
 }
@@ -46,26 +66,7 @@ impl Future for Delay {
     }
 }
 
-fn main() {
-    let mut mini_tokio = MiniTokio::new();
-
-    mini_tokio.spawn(async {
-        spawn(async {
-            delay(Duration::from_millis(100)).await;
-            println!("world");
-        });
-
-        spawn(async {
-            println!("hello");
-        });
-
-        delay(Duration::from_millis(200)).await;
-        std::process::exit(0);
-    });
-
-    mini_tokio.run();
-}
-
+// executor
 struct MiniTokio {
     scheduled: channel::Receiver<Arc<Task>>,
     sender: channel::Sender<Arc<Task>>,
@@ -160,6 +161,7 @@ thread_local! {
     static CURRENT: RefCell<Option<channel::Sender<Arc<Task>>>> = const { RefCell::new(None) };
 }
 
+// Wrapper(Future)
 struct Task {
     future: Mutex<BoxFuture<'static, ()>>,
     executor: channel::Sender<Arc<Task>>,
